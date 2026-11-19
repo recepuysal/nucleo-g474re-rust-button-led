@@ -98,7 +98,8 @@ basarken birkaç milisaniye titreşir (bounce); bu yöntem o titreşimi eler. C+
   değeri butona basınca `true` olmalı. Tersse `bsp.rs` içinde sadece `BUTTON_ACTIVE_LEVEL` değişir.
 - [ ] **170 MHz:** loglardaki zaman damgaları gerçek saniyeyle uyuşmalı.
 - [ ] **Watchdog:** `thread1Hz` içine geçici bir sonsuz döngü koyup kartın ~0,5 s sonra resetlendiğini görmek.
-- [ ] **Yük:** `load_centi_percent` çok düşük (%1'in altı) çıkmalı.
+- [x] **Yük:** kartta ölçüldü (19.11.2026): %0,04 yük, en uzun tick 30 µs (bütçe 2500 µs), bütçe aşımı 0.
+- [x] **Çalışma:** probe-rs 0.32 ile yüklendi; açılış logu ve saniyede bir `$alive` satırı geldi, 8 s boyunca watchdog reseti olmadı.
 
 ## 6. Sonraki adım önerileri
 
