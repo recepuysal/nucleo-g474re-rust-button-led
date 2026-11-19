@@ -92,6 +92,48 @@ basarken birkaç milisaniye titreşir (bounce); bu yöntem o titreşimi eler. C+
 - **İlk derleme uzun** (~1 dakika); sonrakiler birkaç saniye.
 - **Öğrenme eğrisi:** sahiplik (ownership) ve ödünç alma (borrow) kuralları ilk haftalarda yavaşlatır.
 
+## 4.4 Rakamlarla
+
+Ölçüm tarihi 19.11.2026. Aynı uygulamanın C++ hali derlenmedi (bilgisayarda ARM GCC yok), bu yüzden flash/RAM/hız için
+C++ ile birebir kıyas **yok**; ilk tabloda sadece Rust'ın kendi ölçümleri var.
+
+**Kartta ve derlemede ölçülen (Rust):**
+
+| Ölçüm | Değer | Kartın/bütçenin yüzdesi |
+|---|---|---|
+| Flash kullanımı | 11 268 B (11,3 KB) | 512 KB'ın %2,2'si |
+| RAM kullanımı | 1 288 B (1,3 KB) | 128 KB'ın %1,0'ı |
+| MCU yükü | %0,04 | — |
+| En uzun tick | 30 µs | 2 500 µs bütçenin %1,2'si |
+| Bütçe aşımı | 0 | — |
+| Karta yükleme süresi | 0,6 s | — |
+| Temiz derleme | 48,4 s | — |
+| Değişiklik sonrası derleme | 2,6 s | — |
+
+**Kod yapısı: C++ UniBoard firmware vs bu Rust projesi** (sayılar kaynak koddan `grep` ile):
+
+| Ölçüt | C++ (UniBoard v1) | Rust (bu repo) | Kazanç |
+|---|---|---|---|
+| Elle yazılmış HAL soyutlama satırı (`Middleware/`) | 2 816 | 0 | Embassy hazır veriyor |
+| `volatile` kullanımı | 12 | 0 | Unutma riski yok |
+| Elle kesme kapatma/açma noktası | 9 | 0 | Unutma riski yok |
+| `extern` global nesne | 13 | 0 | Her donanımın tek sahibi var |
+| Bir aktüatöre yazabilen dosya sayısı | Isıtıcı PWM: 2 (`main.cpp` + `resin_heater.cpp`) | LED: 1 (`led.rs`), derleyici zorluyor | Yetkisiz yazım derlenmez |
+| `main.cpp`'de ham `HAL_GPIO_*` çağrısı | 13 | 0 (`unsafe` olmadan imkânsız) | Pin numarası tek dosyada |
+| Kendi kodumuzdaki `unsafe` blok | — | 0 | — |
+| Review listesindeki 8 bilinen zayıflıktan derleyicinin yakalayacakları | 0 / 8 | 4 / 8 | tick `volatile`, UART `volatile`, test kodunun ısıtıcıya yazması, ham pin yazımı |
+
+Derleyicinin yakalamadığı 4 madde (UART taşma kontrolü, sabit saat frekansı, 400 Hz'de log, watchdog eksikliği)
+tasarım konusu; Rust'ta da elle düşünülmesi gerekiyor (watchdog bu projede eklendi).
+
+**Bedeli:**
+
+| Ölçüt | Değer |
+|---|---|
+| İlk derleme | 48,4 s (sonrakiler 2,6 s) |
+| Embassy sürüm geçişinde karşılaşılan isim/özellik değişikliği | 2 (`platform-cortex-m`, `dual-bank`) |
+| Grafik pin/saat aracı (CubeMX) | yok, `bsp.rs` elle |
+
 ## 5. Kartta doğrulanacaklar
 
 - [ ] **B1 polaritesi:** MB1367 kartında basınca HIGH varsaydık (Embassy'nin kendi G4 örneği de böyle). Logdaki `raw=`
