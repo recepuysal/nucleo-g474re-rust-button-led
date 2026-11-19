@@ -1,0 +1,9 @@
+[target.thumbv7em-none-eabihf]
+# Flash + RTT log over the on-board ST-LINK:  cargo run --release
+runner = "probe-rs run --chip STM32G474RETx"
+
+[build]
+target = "thumbv7em-none-eabihf"   # Cortex-M4F with hardware FPU
+
+[env]
+DEFMT_LOG = "info"
